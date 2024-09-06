@@ -1,5 +1,5 @@
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 goods = {
@@ -16,7 +16,8 @@ goods = {
 
 def add(items, title, amount, expiration_date=None):
     if expiration_date is not None:
-       expiration_date= datetime.strptime(expiration_date, '%Y-%m-%d').date()
+       expiration_date= datetime.strptime(expiration_date, '%Y-%m-%d')
+       #expiration_date= datetime.strptime(expiration_date, '%Y-%m-%d').date()
     if items.get(title) == None:
        items[title] = [{'amount': amount, 'expiration_date': expiration_date}]     
     else:
@@ -47,7 +48,7 @@ def find(items, needle):
 def amount(items, needle):
    total_amount = 0
    for title, value in items.items():
-      if needle.lower() == title.lower():
+      if needle.lower() in title.lower():
          count = len(value)
          for i in range(count):
             total_amount += value[i]['amount']
@@ -56,24 +57,29 @@ def amount(items, needle):
    return 'Нет таких продуктов!'  
 
 def expire(items, in_advance_days=0):
-   today = datetime.today()
-   expired_product_list = []
-   for title, value in items.items():
+    
+    today = datetime.today()
+    expired_product_list = []
+
+    for title, value in items.items():
       count = len(value)
       for i in range(count):
-         value_dict = value[i]
-         differnce = value_dict['expiration_date'] - today
-         if differnce <= in_advance_days:
-            expired_product = tuple(title, value_dict['amount'])
-            expired_product_list.append(expired_product)
-   if len(expired_product_list) != 0:         
+         if value[i]['expiration_date'] != None:
+            difference = (value[i]['expiration_date'] - today).days
+            if difference <= in_advance_days:
+              expired_product = tuple([title, value[i]['amount']])
+              expired_product_list.append(expired_product)
+
+    if len(expired_product_list) != 0:         
       return f'Вывод: {expired_product_list}'
-   else:
+    else:
       return 'У вас нет просроченных продуктов!'        
             
 
 add_by_note(goods, 'Вода газированная 4 2023-07-15')
-add(goods, 'Вода', Decimal('1.6'), '2023-10-28') 
-print(find(goods, 'йц'))  
-print(amount(goods, 'Пельмени Универсальные'))
-print(expire(goods, 2))            
+#add(goods, 'Вода', Decimal('1.6'), '2023-10-28') 
+#print(find(goods, 'Вода'))  
+#print(amount(goods, 'Пельмени Универсальные'))
+#print(expire(goods, 2))  
+#print(goods) 
+print(type(datetime.today()))         
